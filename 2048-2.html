@@ -1,0 +1,299 @@
+<html>
+  <body style="background-color: #1f1f1f">
+    <table>
+      <tr>
+        <h1>2048</h1>
+        <td id="A1"></td>
+        <td id="A2"></td>
+        <td id="A3"></td>
+        <td id="A4"></td>
+      </tr>
+      <tr>
+        <td id="B1"></td>
+        <td id="B2"></td>
+        <td id="B3"></td>
+        <td id="B4"></td>
+      </tr>
+      <tr>
+        <td id="C1"></td>
+        <td id="C2"></td>
+        <td id="C3"></td>
+        <td id="C4"></td>
+      </tr>
+      <tr>
+        <td id="D1"></td>
+        <td id="D2"></td>
+        <td id="D3"></td>
+        <td id="D4"></td>
+      </tr>
+      <button id="btn-replay" class="play-again"
+          type="button"
+          style="display: none" onclick="refreshpage()">
+      Play Again
+  </button>
+    </div>
+    <div id="bottom"><a href="https://github.com/Bamiot/2048/blob/main/2048.html">GITHUB</a></div>
+  </div>
+    </table>
+  </body>
+</html>
+
+<style>
+  h1 {
+    color: #fff;
+    text-align: left;
+    font-size: 50px;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    margin-left: 65px;
+  }
+  td {
+    width: 50px;
+    height: 50px;
+    border: 1px solid black;
+    text-align: center;
+  }
+  td[class*="cell"] {
+    background-color: black;
+    color: white;
+  }
+  td.cell {
+    background-color: #1f1f1f;
+    color: black;
+  }
+  td.cell1 {
+    background-color: blue;
+    font-size: 36px;
+  }
+  td.cell2 {
+    background-color: red;
+    font-size: 36px;
+  }
+  td.cell4 {
+    background-color: green;
+    font-size: 36px;
+  }
+  td.cell8 {
+    background-color: purple;
+    font-size: 36px;
+  }
+  td.cell16 {
+    background-color: orange;
+    font-size: 32px;
+  }
+  td.cell32 {
+    background-color: yellow;
+    color: black;
+    font-size: 32px;
+  }
+  td.cell64 {
+    background-color: brown;
+    font-size: 32px;
+  }
+  td.cell128 {
+    background-color: pink;
+    font-size: 28px;
+  }
+  td.cell256 {
+    background-color: rgb(109, 40, 40);
+    font-size: 28px;
+  }
+  td.cell512 {
+    background-color: rgb(56, 26, 138);
+    font-size: 28px;
+  }
+  td.cell1024 {
+    background-color: rgb(181, 214, 91);
+    font-size: 22px;
+  }
+  td.cell2048 {
+    background-color: gold;
+    font-size: 22px;
+  }
+  .play-again{
+    margin-left: 65px;
+    border: 0;
+    position: absolute;
+    top: 280px;
+    line-height: 2.5;
+    padding: 0 20px;
+    text-align: center;
+    color: #fff;
+    text-shadow: 1px 1px 1px #000;
+    border-radius: 10px;
+    background-color: rgb(58, 56, 56);
+    background-image: linear-gradient(to top left,
+                                      rgba(0, 0, 0, .2),
+                                      rgba(0, 0, 0, .2) 30%,
+                                      rgba(0, 0, 0, 0));
+    box-shadow: inset 2px 2px 3px rgba(255, 255, 255, .6),
+                inset -2px -2px 3px rgba(0, 0, 0, .6);
+}
+
+.play-again:hover {
+    background-color: rgb(49, 48, 48);
+}
+
+.play-again:active {
+    box-shadow: inset -2px -2px 3px rgba(255, 255, 255, .6),
+                inset 2px 2px 3px rgba(0, 0, 0, .6);
+}
+    #bottom {
+    color: #fff;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+}
+
+</style>
+
+<script>
+    var end = 0;
+  const A1 = document.getElementById("A1");
+  const A2 = document.getElementById("A2");
+  const A3 = document.getElementById("A3");
+  const A4 = document.getElementById("A4");
+  const B1 = document.getElementById("B1");
+  const B2 = document.getElementById("B2");
+  const B3 = document.getElementById("B3");
+  const B4 = document.getElementById("B4");
+  const C1 = document.getElementById("C1");
+  const C2 = document.getElementById("C2");
+  const C3 = document.getElementById("C3");
+  const C4 = document.getElementById("C4");
+  const D1 = document.getElementById("D1");
+  const D2 = document.getElementById("D2");
+  const D3 = document.getElementById("D3");
+  const D4 = document.getElementById("D4");
+
+  const rowA = [A1, A2, A3, A4];
+  const rowB = [B1, B2, B3, B4];
+  const rowC = [C1, C2, C3, C4];
+  const rowD = [D1, D2, D3, D4];
+
+  const rows = [rowA, rowB, rowC, rowD];
+
+  const col1 = [A1, B1, C1, D1];
+  const col2 = [A2, B2, C2, D2];
+  const col3 = [A3, B3, C3, D3];
+  const col4 = [A4, B4, C4, D4];
+
+  const cols = [col1, col2, col3, col4];
+
+  const randomInt = (max) =>
+    `${Math.floor(Math.random() * Math.floor(max)) + 1}`;
+  const trueAt = (percent) => Math.random() < percent;
+
+  function fillRandomWithNumber() {
+    for (let i = 0; i < 6; i++) addRandomNumberInEmptyCell();
+  }
+
+  function gridIsFull() {
+    for (const r of rows)
+      for (const c of r) if (c.innerHTML === "") return false;
+    return true;
+  }
+function refreshpage(){
+    location.reload();
+}
+  function loss() {
+    alert("Loose");
+      end = 1;
+      document.getElementById("btn-replay").style.display = 'inline';
+  }
+
+  function addRandomNumberInEmptyCell() {
+    let cell;
+    while (cell?.innerHTML !== "") {
+      if (gridIsFull()) return loss();
+      cell = rows[randomInt(rows.length) - 1][randomInt(rows[0].length) - 1];
+    }
+    const val = randomInt(2);
+    cell.innerHTML = val;
+    cell.className = `cell${val}`;
+  }
+
+  Array.prototype.pushAndMerge = function (reverse) {
+    if (reverse) this.reverse();
+    //
+    const length = this.length;
+    let arr = [];
+    // get array without empty cells
+    for (let i = 0; i < length; i++) if (this[i] !== "") arr.push(this[i]);
+    // merge
+    for (let i = 0; i < arr.length; i++) {
+      if (arr[i] === arr[i + 1] && arr[i] !== "") {
+        arr[i] = `${parseInt(arr[i]) * 2}`;
+        arr[i + 1] = "";
+      }
+    }
+    // re-remove empty cells
+    arr = arr.filter((x) => x !== "");
+    // clear this
+    for (let i = 0; i < length; i++) this[i] = "";
+    // add new values at the end
+    for (let i = 0; i < length - arr.length; i++) this[i] = "";
+    for (let i = length - arr.length; i < length; i++)
+      this[i] = arr[i - (length - arr.length)];
+    //
+    if (reverse) this.reverse();
+  };
+
+  function processArray(array, reverse) {
+    const vals = array.map((cell) => cell.innerHTML);
+    vals.pushAndMerge(reverse);
+    array.forEach((cell, i) => {
+      cell.innerHTML = vals[i];
+      cell.className = `cell${vals[i]}`;
+    });
+  }
+
+  function play(direction, end) {
+      if (end) return;
+    switch (direction) {
+      case "up":
+        cols.forEach((col) => {
+          processArray(col, true);
+        });
+        break;
+      case "down":
+        cols.forEach((col) => {
+          processArray(col);
+        });
+        break;
+      case "left":
+        rows.forEach((row) => {
+          processArray(row, true);
+        });
+        break;
+      case "right":
+        rows.forEach((row) => {
+          processArray(row);
+        });
+        break;
+      default:
+        break;
+    }
+    addRandomNumberInEmptyCell();
+}
+  document.addEventListener("keydown", (e) => {
+    switch (e.key) {
+      case "ArrowUp":
+        play("up", end);
+        break;
+      case "ArrowDown":
+      play("down", end);
+        break;
+      case "ArrowLeft":
+      play("left", end);
+        break;
+      case "ArrowRight":
+      play("right", end);
+        break;
+      default:
+        break;
+    }
+  });
+
+  fillRandomWithNumber();
+</script>
